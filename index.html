@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyDiaryAir ✍️</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e1e2f, #2b2b40);
+      color: #f5f5f5;
+      text-align: center;
+      padding: 20px;
+    }
+    header {
+      margin-bottom: 30px;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: #ffdd57;
+    }
+    nav a {
+      margin: 0 15px;
+      text-decoration: none;
+      color: #76c7c0;
+      font-weight: bold;
+    }
+    textarea {
+      width: 80%;
+      height: 150px;
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      outline: none;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 10px;
+      background-color: #76c7c0;
+      color: #1e1e2f;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #57a39f;
+    }
+    .entries {
+      margin-top: 40px;
+      text-align: left;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .entry {
+      background: #2e2e4d;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+    }
+    .motivation {
+      margin-top: 40px;
+      font-style: italic;
+      font-size: 1.1rem;
+      color: #b3e5fc;
+    }
+    footer {
+      margin-top: 50px;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>📓 MyDiaryAir</h1>
+    <nav>
+      <a href="#home">🏠 Home</a>
+      <a href="#write">✍️ Write</a>
+      <a href="#view">📖 View Entries</a>
+      <a href="#mood">😊 Mood Tracker</a>
+    </nav>
+  </header>
+
+  <section id="home">
+    <h2>Welcome to MyDiaryAir ✨</h2>
+    <p>Write your thoughts, track your mood, and stay motivated every day 🌙</p>
+  </section>
+
+  <section id="write">
+    <h2>✍️ Write Today's Diary</h2>
+    <textarea id="diaryEntry" placeholder="Write your thoughts here..."></textarea><br>
+    <button onclick="saveEntry()">Save Entry</button>
+  </section>
+
+  <section id="view">
+    <h2>📖 Your Previous Entries</h2>
+    <div class="entries" id="entriesList"></div>
+  </section>
+
+  <section id="mood">
+    <h2>😊 Mood Tracker</h2>
+    <p>How are you feeling today?</p>
+    <label><input type="radio" name="mood" value="😀 Happy"> 😀 Happy</label><br>
+    <label><input type="radio" name="mood" value="😢 Sad"> 😢 Sad</label><br>
+    <label><input type="radio" name="mood" value="😡 Angry"> 😡 Angry</label><br>
+    <label><input type="radio" name="mood" value="😌 Calm"> 😌 Calm</label><br>
+    <label><input type="radio" name="mood" value="😴 Tired"> 😴 Tired</label><br>
+    <button onclick="saveMood()">Save Mood</button>
+    <p id="moodDisplay"></p>
+  </section>
+
+  <section class="motivation">
+    🌟 "Every day may not be good, but there is something good in every day."  
+    <br>💡 Fact: Writing a diary regularly improves mental health and reduces stress!
+  </section>
+
+  <footer>
+    © 2025 MyDiaryAir | Made with ❤️ by SriSingh
+  </footer>
+
+  <script>
+    // Save Diary Entry
+    function saveEntry() {
+      let entryText = document.getElementById("diaryEntry").value.trim();
+      if (!entryText) {
+        alert("Please write something before saving!");
+        return;
+      }
+      let today = new Date();
+      let entry = {
+        text: entryText,
+        date: today.toLocaleString()
+      };
+
+      let entries = JSON.parse(localStorage.getItem("diaryEntries")) || [];
+      entries.push(entry);
+
+      // Keep only last 30 days of entries
+      if (entries.length > 30) {
+        entries.shift();
+      }
+
+      localStorage.setItem("diaryEntries", JSON.stringify(entries));
+      document.getElementById("diaryEntry").value = "";
+      loadEntries();
+      alert("Your entry has been saved! ✅");
+    }
+
+    // Load Entries
+    function loadEntries() {
+      let entries = JSON.parse(localStorage.getItem("diaryEntries")) || [];
+      let entriesList = document.getElementById("entriesList");
+      entriesList.innerHTML = "";
+      entries.forEach(entry => {
+        let div = document.createElement("div");
+        div.className = "entry";
+        div.innerHTML = `<strong>${entry.date}</strong><br>${entry.text}`;
+        entriesList.appendChild(div);
+      });
+    }
+
+    // Save Mood
+    function saveMood() {
+      let moodOptions = document.getElementsByName("mood");
+      let selectedMood = "";
+      for (let mood of moodOptions) {
+        if (mood.checked) {
+          selectedMood = mood.value;
+          break;
+        }
+      }
+      if (!selectedMood) {
+        alert("Please select a mood before saving!");
+        return;
+      }
+      localStorage.setItem("todayMood", selectedMood);
+      document.getElementById("moodDisplay").innerText = "Your mood today: " + selectedMood;
+    }
+
+    // Load Mood on refresh
+    window.onload = function () {
+      loadEntries();
+      let savedMood = localStorage.getItem("todayMood");
+      if (savedMood) {
+        document.getElementById("moodDisplay").innerText = "Your mood today: " + savedMood;
+      }
+    }
+  </script>
+
+</body>
+</html>
